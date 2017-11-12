@@ -22,7 +22,7 @@ class CoreContainer extends React.Component {
    */
   componentDidMount() {
     if (Platform.OS === 'android') {
-      StatusBar.setBackgroundColor('#0279ba');
+      StatusBar.setBackgroundColor('#1976D2');
     }
     if (Platform.OS === 'ios') {
       StatusBar.setBarStyle('light-content');
@@ -31,7 +31,7 @@ class CoreContainer extends React.Component {
     NetInfo.isConnected.fetch().then((isConnected) => {
       this.handleAppStateChange('active'); // Force connect (react debugger issue)
       this.props.dispatch(setNetworkState(isConnected));
-      NetInfo.isConnected.addEventListener('change', this.handleNetworkChange);
+      NetInfo.isConnected.addEventListener('connectionChange', this.handleNetworkChange);
     });
   }
 
@@ -40,7 +40,7 @@ class CoreContainer extends React.Component {
    */
   componentWillUnmount() {
     AppState.removeEventListener('change', this.handleAppStateChange);
-    NetInfo.isConnected.removeEventListener('change', this.handleNetworkChange);
+    NetInfo.isConnected.removeEventListener('connectionChange', this.handleNetworkChange);
   }
 
   props: Props;

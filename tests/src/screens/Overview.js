@@ -1,4 +1,5 @@
-import React, { PropTypes } from 'react';
+import React from 'react';
+import PropTypes from 'prop-types';
 import { StyleSheet, View, Text, ListView, TouchableHighlight } from 'react-native';
 import { connect } from 'react-redux';
 import some from 'lodash.some';
@@ -14,10 +15,12 @@ class Overview extends React.Component {
   static navigationOptions = {
     title: 'Test Suites',
     headerTintColor: '#ffffff',
-    headerStyle: { backgroundColor: '#0288d1' },
-    headerRight: <View style={{ marginRight: 8 }}>
-      <OverviewControlButton />
-    </View>
+    headerStyle: { backgroundColor: '#1976D2' },
+    headerRight: (
+      <View style={{ marginRight: 8 }}>
+        <OverviewControlButton />
+      </View>
+    ),
   };
 
   /**

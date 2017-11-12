@@ -3,7 +3,9 @@
 @import UserNotifications;
 #if __has_include(<FirebaseMessaging/FirebaseMessaging.h>)
 #import "RNFirebaseEvents.h"
+#import "RNFirebaseUtil.h"
 #import <FirebaseMessaging/FirebaseMessaging.h>
+#import <FirebaseInstanceID/FIRInstanceID.h>
 
 #import <React/RCTEventDispatcher.h>
 #import <React/RCTConvert.h>
@@ -142,6 +144,7 @@ RCT_EXPORT_MODULE()
 + (void)didReceiveLocalNotification:(UILocalNotification *)notification {
     NSMutableDictionary* data = [[NSMutableDictionary alloc] initWithDictionary: notification.userInfo];
     [data setValue:@"local_notification" forKey:@"_notificationType"];
+    [data setValue:@(RCTSharedApplication().applicationState == UIApplicationStateInactive) forKey:@"opened_from_tray"];
     [[NSNotificationCenter defaultCenter] postNotificationName:MESSAGING_NOTIFICATION_RECEIVED object:self userInfo:@{@"data": data}];
 }
 
@@ -215,7 +218,7 @@ RCT_EXPORT_MODULE()
         data[@"_completionHandlerId"] = completionHandlerId;
     }
 
-    [self sendEventWithName:MESSAGING_NOTIFICATION_RECEIVED body:data];
+    [RNFirebaseUtil sendJSEvent:self name:MESSAGING_NOTIFICATION_RECEIVED body:data];
 }
 
 
@@ -232,13 +235,13 @@ RCT_EXPORT_MODULE()
 // ** Start FIRMessagingDelegate methods **
 // Handle data messages in the background
 - (void)applicationReceivedRemoteMessage:(FIRMessagingRemoteMessage *)remoteMessage {
-    [self sendEventWithName:MESSAGING_NOTIFICATION_RECEIVED body:[remoteMessage appData]];
+    [RNFirebaseUtil sendJSEvent:self name:MESSAGING_NOTIFICATION_RECEIVED body:[remoteMessage appData]];
 }
 
 // Listen for token refreshes
 - (void)messaging:(nonnull FIRMessaging *)messaging didRefreshRegistrationToken:(nonnull NSString *)fcmToken {
     NSLog(@"FCM registration token: %@", fcmToken);
-    [self sendEventWithName:MESSAGING_TOKEN_REFRESHED body:fcmToken];
+    [RNFirebaseUtil sendJSEvent:self name:MESSAGING_TOKEN_REFRESHED body:fcmToken];
 }
 // ** End FIRMessagingDelegate methods **
 
@@ -254,6 +257,16 @@ RCT_EXPORT_METHOD(getInitialNotification:(RCTPromiseResolveBlock)resolve rejecte
 
 RCT_EXPORT_METHOD(getToken:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject) {
     resolve([FIRMessaging messaging].FCMToken);
+}
+
+RCT_EXPORT_METHOD(deleteInstanceId:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject) {
+    [[FIRInstanceID instanceID] deleteIDWithHandler:^(NSError * _Nullable error) {
+        if (!error) {
+            resolve(nil);
+        } else {
+            reject(@"instance_id_error", @"Failed to delete instance id", error);
+        }
+    }];
 }
 
 RCT_EXPORT_METHOD(requestPermissions:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject) {
@@ -285,7 +298,9 @@ RCT_EXPORT_METHOD(requestPermissions:(RCTPromiseResolveBlock)resolve rejecter:(R
 #endif
     }
 
-    [RCTSharedApplication() registerForRemoteNotifications];
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [RCTSharedApplication() registerForRemoteNotifications];
+    });
 }
 
 RCT_EXPORT_METHOD(subscribeToTopic: (NSString*) topic) {
@@ -385,7 +400,9 @@ RCT_EXPORT_METHOD(getScheduledLocalNotifications:(RCTPromiseResolveBlock)resolve
 }
 
 RCT_EXPORT_METHOD(setBadgeNumber: (NSInteger*) number) {
-    [RCTSharedApplication() setApplicationIconBadgeNumber:number];
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [RCTSharedApplication() setApplicationIconBadgeNumber:number];
+    });
 }
 
 RCT_EXPORT_METHOD(getBadgeNumber: (RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject) {
@@ -432,6 +449,11 @@ RCT_EXPORT_METHOD(finishNotificationResponse: (NSString *)completionHandlerId) {
 
 - (NSArray<NSString *> *)supportedEvents {
     return @[MESSAGING_TOKEN_REFRESHED, MESSAGING_NOTIFICATION_RECEIVED];
+}
+
++ (BOOL)requiresMainQueueSetup
+{
+    return YES;
 }
 
 @end

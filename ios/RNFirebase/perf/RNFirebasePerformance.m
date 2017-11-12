@@ -17,7 +17,7 @@ RCT_EXPORT_MODULE();
     if (_traces[identifier]) {
         return _traces[identifier];
     }
-    FIRTrace *trace = [FIRPerformance startTraceWithName:identifier];
+    FIRTrace *trace = [[FIRPerformance sharedInstance] traceWithName:identifier];
     _traces[identifier] = trace;
     return trace;
 }
@@ -43,6 +43,11 @@ RCT_EXPORT_METHOD(incrementCounter:
             event:
             (NSString *) event) {
     [[self getOrCreateTrace:identifier] incrementCounterNamed:event];
+}
+
++ (BOOL)requiresMainQueueSetup
+{
+    return YES;
 }
 
 @end

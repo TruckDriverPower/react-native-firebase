@@ -1,21 +1,23 @@
 {
   "name": "react-native-firebase",
-  "version": "2.1.2",
+  "version": "3.1.0",
   "author": "Invertase <contact@invertase.io> (http://invertase.io)",
-  "description": "A well tested, feature rich Firebase implementation for React Native, supporting iOS & Android. Individual module support for Auth, Database, Messaging (FCM), Remote Config, Storage, Admob, Analytics, Crash Reporting, and Performance.",
+  "description": "A well tested, feature rich Firebase implementation for React Native, supporting iOS & Android. Individual module support for Admob, Analytics, Auth, Crash Reporting, Cloud Firestore, Database, Dynamic Links, Messaging (FCM), Remote Config, Storage and Performance.",
   "main": "index",
   "scripts": {
-    "build": "./node_modules/.bin/babel --source-maps=true --out-dir=dist .",
-    "dev": "npm run compile -- --watch",
+    "flow": "flow",
     "lint": "eslint ./src",
+    "dev": "npm run compile -- --watch",
+    "build": "./node_modules/.bin/babel --source-maps=true --out-dir=dist .",
     "publish_pages": "gh-pages -d public/",
-    "tests-npm-install": "cd tests && npm install",
+    "docs-serve-local": "docsify serve docs",
+    "test-cli": "node ./bin/test.js",
     "tests-packager": "cd tests && npm run start",
-    "tests-watch-init": "wml add $(node --eval \"console.log(require('path').resolve('./lib'));\") $(node --eval \"console.log(require('path').resolve('./tests/firebase'));\")",
-    "tests-watch-start": "watchman watch $(node --eval \"console.log(require('path').resolve('./lib'));\") && wml start",
-    "tests-watch-stop": "watchman watch-del $(node --eval \"console.log(require('path').resolve('./lib'));\") && wml stop",
+    "tests-npm-install": "cd tests && npm install",
     "tests-pod-install": "cd tests && npm run ios:pod:install",
-    "flow": "flow"
+    "tests-watch-start": "npm run test-cli watch init start",
+    "tests-watch-stop": "npm run test-cli watch stop",
+    "postinstall": "opencollective postinstall"
   },
   "repository": {
     "type": "git",
@@ -31,18 +33,26 @@
       "./node_modules/react-addons-test-utils"
     ]
   },
-  "license": "MIT",
+  "license": "APACHE-2.0",
   "keywords": [
     "react",
     "admob",
     "auth",
     "config",
+    "digits",
+    "phone-auth",
+    "sms",
+    "firestore",
+    "cloud-firestore",
+    "datastore",
     "remote-config",
     "transactions",
     "react-native",
     "react-native-firebase",
     "firebase",
     "fcm",
+    "apn",
+    "gcm",
     "analytics",
     "messaging",
     "database",
@@ -50,11 +60,14 @@
     "ios",
     "crash",
     "firestack",
-    "performance"
+    "performance",
+    "firestore",
+    "dynamic-links"
   ],
   "peerDependencies": {
     "react": "*",
-    "react-native": ">= 0.40.0"
+    "react-native": ">= 0.48.0",
+    "fbjs": "*"
   },
   "devDependencies": {
     "babel-eslint": "^7.0.0",
@@ -68,21 +81,31 @@
     "eslint-plugin-import": "^2.0.1",
     "eslint-plugin-jsx-a11y": "^2.2.3",
     "eslint-plugin-react": "^6.4.1",
-    "flow-bin": "^0.46.0",
-    "react": "^15.3.0",
-    "react-dom": "^15.3.0",
-    "react-native": "^0.44.0",
+    "flow-bin": "^0.55.0",
+    "react": "^16.0.0",
+    "react-dom": "^16.0.0",
+    "react-native": "^0.48.0",
+    "shelljs": "^0.7.8",
     "wml": "0.0.82"
   },
   "dependencies": {
     "bows": "^1.6.0",
-    "prop-types": "^15.5.10"
+    "opencollective": "^1.0.3",
+    "prop-types": "^15.6.0"
   },
   "rnpm": {
     "android": {
       "buildPatch": "    compile(project(':react-native-firebase')) {\n        transitive = false\n    }\n",
-      "packageImportPath": "import io.invertase.firebase.RNFirebasePackage;\nimport io.invertase.firebase.analytics.RNFirebaseAnalyticsPackage;",
-      "packageInstance": "new RNFirebasePackage(),\n            new RNFirebaseAnalyticsPackage()"
+      "packageImportPath": "import io.invertase.firebase.RNFirebasePackage;",
+      "packageInstance": "new RNFirebasePackage()"
+    },
+    "commands": {
+      "postlink": "node node_modules/react-native-firebase/scripts/rnpm-postlink"
     }
+  },
+  "collective": {
+    "type": "opencollective",
+    "url": "https://opencollective.com/react-native-firebase",
+    "logo": "https://opencollective.com/opencollective/logo.txt"
   }
 }
